@@ -29,6 +29,35 @@ function Dashboard() {
       })
   }, [])
 
+  const handleDelete = async (id) => {
+    const userData = sessionStorage.getItem('token')
+    const user = userData ? userData : null
+
+    try {
+      // Delete the product
+      await axios.delete(`http://192.95.51.55:4060/products/${id}`, {
+        headers: {
+          Authorization: `Bearer ${user}`,
+        },
+      })
+
+      // Fetch the updated list of products
+      const updatedProducts = await axios.get(
+        'http://192.95.51.55:4060/products',
+        {
+          headers: {
+            Authorization: `Bearer ${user}`,
+          },
+        }
+      )
+
+      // Update the state with the new list of products
+      setProducts(updatedProducts.data)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   return (
     <div>
       {/* Navbar */}
@@ -53,6 +82,12 @@ function Dashboard() {
               <h2 className='text-xl font-semibold mb-2'>{product.name}</h2>
               <p className='text-gray-700'>{product.description}</p>
               <p className='mt-2 text-blue-500'>${product.price}</p>
+              <button
+                className='bg-red-500 text-white px-4 py-2 rounded-md mt-2'
+                onClick={() => handleDelete(product._id)}
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>
