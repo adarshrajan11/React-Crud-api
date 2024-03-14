@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom' // Import Link from react-router-dom
+import UpdateProductModal from './UpdateProductModal'
 
 function Dashboard() {
   const [products, setProducts] = useState([])
-
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   useEffect(() => {
     const userData = sessionStorage.getItem('token')
     const user = userData ? userData : null
@@ -57,7 +59,35 @@ function Dashboard() {
       console.log(err)
     }
   }
+  const handleUpdate = (product) => {
+    setSelectedProduct(product)
+    setIsModalOpen(true)
+  }
+  const handleUpdateSubmit = async (id, updatedData) => {
+    const userData = sessionStorage.getItem('token')
+    const user = userData ? userData : null
 
+    try {
+      await axios.put(`http://192.95.51.55:4060/products/${id}`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${user}`,
+        },
+      })
+
+      const updatedProducts = await axios.get(
+        'http://192.95.51.55:4060/products',
+        {
+          headers: {
+            Authorization: `Bearer ${user}`,
+          },
+        }
+      )
+
+      setProducts(updatedProducts.data)
+    } catch (err) {
+      console.log(err)
+    }
+  }
   return (
     <div>
       {/* Navbar */}
@@ -71,6 +101,13 @@ function Dashboard() {
           </Link>
         </div>
       </nav>
+      {isModalOpen && (
+        <UpdateProductModal
+          product={selectedProduct}
+          onClose={() => setIsModalOpen(false)}
+          onUpdate={handleUpdateSubmit}
+        />
+      )}
 
       {/* Dashboard Content */}
       <div className='container mx-auto mt-8'>
@@ -82,6 +119,12 @@ function Dashboard() {
               <h2 className='text-xl font-semibold mb-2'>{product.name}</h2>
               <p className='text-gray-700'>{product.description}</p>
               <p className='mt-2 text-blue-500'>${product.price}</p>
+              <button
+                className='bg-blue-500 text-white px-4 py-2 rounded-md mr-2 mt-2'
+                onClick={() => handleUpdate(product)}
+              >
+                Update
+              </button>
               <button
                 className='bg-red-500 text-white px-4 py-2 rounded-md mt-2'
                 onClick={() => handleDelete(product._id)}

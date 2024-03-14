@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import axios from 'axios'
+import { Link, useNavigate } from 'react-router-dom'
 
 function AddProduct() {
   const [productData, setProductData] = useState({
@@ -7,7 +8,7 @@ function AddProduct() {
     price: '',
     description: '',
   })
-
+  const navigate = useNavigate()
   const handleInputChange = (e) => {
     setProductData({
       ...productData,
@@ -40,6 +41,7 @@ function AddProduct() {
       )
 
       console.log('Product added successfully:', response.data)
+      navigate('/dashboard')
 
       // Clear the form after successful submission
       setProductData({
